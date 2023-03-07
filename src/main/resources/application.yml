@@ -1,0 +1,15 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/postgres
+    driver-class-name: org.postgresql.Driver
+    username: test_user
+    password: 123password
+  jpa:
+    hibernate:
+      ddl-auto: update
+springdoc:
+  api-docs:
+    enabled: true
+# http://127.0.0.1:8080/swagger-ui/index.html. Это стандартный адрес, по которому доступен веб-интерфейс springdoc
+  swagger-ui:
+    url: /api-docs.yml

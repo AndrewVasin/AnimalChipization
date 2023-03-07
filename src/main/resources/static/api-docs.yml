@@ -1,0 +1,106 @@
+openapi: 3.0.3
+info:
+  title: Animal Chipization API
+  description: Animal Chipization API
+  version: 1.0.0
+servers:
+  - url: http://localhost:8080
+tags:
+  - name: Account
+paths:
+  /registration:
+    post:
+      summary: create Account
+      operationId: createNewAccount
+      tags:
+        - Account
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AccountCreateRequest'
+      responses:
+        201:
+          description: Новый аккаунт успешно создан
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccountResponse'
+        400:
+          description: Неверные данные
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccountResponse'
+        409:
+          description: Аккаунт с таким email уже существует
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccountResponse'
+  /accounts/{accountId}:
+    delete:
+      summary: delete Account
+      operationId: deleteAccount
+      tags:
+        - Account
+      parameters:
+        - name: accountId
+          in: path
+          description: account ID to delete
+          required: true
+          schema:
+            type: integer
+            format: int32
+      responses:
+        200:
+          description: Аккаунт успешно удален
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EmptyBody'
+
+components:
+  schemas:
+    AccountResponse:
+      type: object
+      description: Account Response DTO
+      properties:
+        id:
+          type: integer
+          format: int32
+        firstName:
+          type: string
+        lastName:
+          type: string
+        email:
+          type: string
+    AccountCreateRequest:
+      type: object
+      description: Account DTO
+      properties:
+        firstName:
+          type: string
+          minLength: 1
+          maxLength: 1024
+        lastName:
+          type: string
+          minLength: 1
+          maxLength: 1024
+        email:
+          type: string
+          minLength: 3
+          maxLength: 1024
+          format: email
+        password:
+          type: string
+          minLength: 1
+          maxLength: 1024
+      required:
+        - firstName
+        - lastName
+        - email
+        - password
+    EmptyBody:
+      type: object
+      description: Empty Body
