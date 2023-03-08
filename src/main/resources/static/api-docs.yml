@@ -59,6 +59,31 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/EmptyBody'
+    get:
+      summary: find Account by ID
+      operationId: findAccount
+      tags:
+        - Account
+      parameters:
+        - name: accountId
+          in: path
+          description: account ID to find
+          required: true
+          schema:
+            type: integer
+            format: int32
+            minimum: 0
+      responses:
+        200:
+          description: Аккаунт найден
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccountResponse'
+        400:
+          description: Id is null or < 0
+        404:
+          description: Аккаунт не найден
 
 components:
   schemas:

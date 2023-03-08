@@ -20,6 +20,10 @@ public class AccountServiceImpl implements AccountService {
         return accountRepository.findByEmail(email);
     }
 
+    public Optional<Account> findAccountById(Integer id) {
+        return accountRepository.findById(id);
+    }
+
     public AccountResponse createAccount(AccountCreateRequest accountCreateRequest) {
         Account account = new Account();
         account.setFirstName(accountCreateRequest.getFirstName());

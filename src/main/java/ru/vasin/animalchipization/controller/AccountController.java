@@ -6,6 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
+import ru.vasin.animalchipization.model.Account;
 import ru.vasin.animalchipization.service.AccountServiceImpl;
 import ru.vasin.web.controller.AccountApi;
 import ru.vasin.web.dto.AccountCreateRequest;
@@ -13,6 +14,7 @@ import ru.vasin.web.dto.AccountResponse;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.regex.Pattern;
 
 @RestController
@@ -45,6 +47,22 @@ public class AccountController implements AccountApi {
     public ResponseEntity<Object> deleteAccount(@PathVariable Integer accountId) {
         accountServiceImpl.deleteAccountById(accountId);
         return ResponseEntity.ok().build();
+    }
+
+    @Override
+    public ResponseEntity<AccountResponse> findAccount(@PathVariable Integer accountId) {
+        Optional<Account> account = accountServiceImpl.findAccountById(accountId);
+        if (account.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        new AccountResponse();
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(AccountResponse.builder()
+                        .id(account.get().getId())
+                        .firstName(account.get().getFirstName())
+                        .lastName(account.get().getLastName())
+                        .email(account.get().getEmail())
+                        .build());
     }
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)

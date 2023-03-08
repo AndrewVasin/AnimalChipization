@@ -9,4 +9,5 @@ import java.util.Optional;
 public interface AccountService {
     Optional<Account> findAccountByEmail(String email);
     AccountResponse createAccount(AccountCreateRequest accountCreateRequest);
+    Optional<Account> findAccountById(Integer id);
 }
