@@ -1,6 +1,7 @@
 package ru.vasin.animalchipization.controller;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
@@ -12,11 +13,13 @@ import ru.vasin.web.controller.AccountApi;
 import ru.vasin.web.dto.AccountCreateRequest;
 import ru.vasin.web.dto.AccountResponse;
 
+import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.regex.Pattern;
 
+@Slf4j
 @RestController
 @RequiredArgsConstructor
 public class AccountController implements AccountApi {
@@ -31,6 +34,7 @@ public class AccountController implements AccountApi {
 
         // Проверка имейла на существование. Если аккаунт с таким имейлом уже существует - отдаем 409
         if (accountServiceImpl.findAccountByEmail((accountCreateRequest.getEmail())).isPresent()) {
+            log.error("Account with email " + accountCreateRequest.getEmail() + " already exist");
             return ResponseEntity.status(HttpStatus.CONFLICT)
                     .body(new AccountResponse(null,
                             accountCreateRequest.getFirstName(),
@@ -40,12 +44,14 @@ public class AccountController implements AccountApi {
 
         // На этом этапе данные уже валидные, создаем новый аккаунт и отдаем 201
         AccountResponse accountResponse = accountServiceImpl.createAccount(accountCreateRequest);
-        return new ResponseEntity<>(accountResponse, HttpStatus.CREATED);
+        log.info("New account " + accountResponse.getFirstName() + " " + accountResponse.getLastName() + " created");
+        return ResponseEntity.created(URI.create("/accounts/" + accountResponse.getId())).body(accountResponse);
     }
 
     @Override
-    public ResponseEntity<Object> deleteAccount(@PathVariable Integer accountId) {
+    public ResponseEntity<Void> deleteAccount(@PathVariable Integer accountId) {
         accountServiceImpl.deleteAccountById(accountId);
+        log.info("Account with Id: " + accountId + " deleted");
         return ResponseEntity.ok().build();
     }
 
@@ -53,16 +59,18 @@ public class AccountController implements AccountApi {
     public ResponseEntity<AccountResponse> findAccount(@PathVariable Integer accountId) {
         Optional<Account> account = accountServiceImpl.findAccountById(accountId);
         if (account.isEmpty()) {
+            log.error("Account with Id: " + accountId + " not found");
             return ResponseEntity.notFound().build();
         }
         new AccountResponse();
-        return ResponseEntity.status(HttpStatus.OK)
-                .body(AccountResponse.builder()
-                        .id(account.get().getId())
-                        .firstName(account.get().getFirstName())
-                        .lastName(account.get().getLastName())
-                        .email(account.get().getEmail())
-                        .build());
+        AccountResponse accountResponse = AccountResponse.builder()
+                .id(account.get().getId())
+                .firstName(account.get().getFirstName())
+                .lastName(account.get().getLastName())
+                .email(account.get().getEmail())
+                .build();
+        log.info("Account with Id: " + accountId + " found");
+        return ResponseEntity.status(HttpStatus.OK).body(accountResponse);
     }
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)

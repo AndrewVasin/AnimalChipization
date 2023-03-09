@@ -55,10 +55,6 @@ paths:
       responses:
         200:
           description: Аккаунт успешно удален
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/EmptyBody'
     get:
       summary: find Account by ID
       operationId: findAccount
@@ -107,20 +103,20 @@ components:
         firstName:
           type: string
           minLength: 1
-          maxLength: 1024
+          maxLength: 255
         lastName:
           type: string
           minLength: 1
-          maxLength: 1024
+          maxLength: 255
         email:
           type: string
           minLength: 3
-          maxLength: 1024
+          maxLength: 255
           format: email
         password:
           type: string
           minLength: 1
-          maxLength: 1024
+          maxLength: 255
       required:
         - firstName
         - lastName

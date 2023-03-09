@@ -92,7 +92,7 @@ public class AccountControllerTest {
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.firstName").value("must not be null"))
-                .andExpect(jsonPath("$.password").value("size must be between 1 and 1024"))
+                .andExpect(jsonPath("$.password").value("size must be between 1 and 255"))
                 .andExpect(jsonPath("$.email").value("must be a well-formed email address"));
     }
 
