@@ -2,6 +2,7 @@ package ru.vasin.animalchipization.controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
@@ -48,9 +49,19 @@ public class AccountController implements AccountApi {
         return ResponseEntity.created(URI.create("/accounts/" + accountResponse.getId())).body(accountResponse);
     }
 
+    // TODO: implement validation when accountId is null
     @Override
     public ResponseEntity<Void> deleteAccount(@PathVariable Integer accountId) {
-        accountServiceImpl.deleteAccountById(accountId);
+        if (accountId <= 0) {
+            log.error("Id " + accountId + " is not correct");
+            return ResponseEntity.badRequest().build();
+        }
+        try {
+            accountServiceImpl.deleteAccountById(accountId);
+        } catch (EmptyResultDataAccessException e) {
+            log.error("Account with Id: " + accountId + " not found");
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
         log.info("Account with Id: " + accountId + " deleted");
         return ResponseEntity.ok().build();
     }

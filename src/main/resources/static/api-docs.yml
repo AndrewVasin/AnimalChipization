@@ -55,6 +55,10 @@ paths:
       responses:
         200:
           description: Аккаунт успешно удален
+        400:
+          description: accountId = null or accountId <= 0
+        403:
+          description: Аккаунт с таким accountId не найден
     get:
       summary: find Account by ID
       operationId: findAccount
