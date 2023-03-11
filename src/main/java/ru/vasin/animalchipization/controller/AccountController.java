@@ -3,11 +3,14 @@ package ru.vasin.animalchipization.controller;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingPathVariableException;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.context.request.WebRequest;
 import ru.vasin.animalchipization.model.Account;
 import ru.vasin.animalchipization.service.AccountServiceImpl;
 import ru.vasin.web.controller.AccountApi;
@@ -95,5 +98,12 @@ public class AccountController implements AccountApi {
             errors.put(fieldName, errorMessage);
         });
         return errors;
+    }
+
+    @ExceptionHandler(MissingPathVariableException.class)
+    public ResponseEntity<Void> handleMissingPathVariable(MissingPathVariableException ex,
+                                                          HttpHeaders headers, HttpStatus status, WebRequest request) {
+        String error = "Path Variable : " + ex.getVariableName() + " is missing";
+        return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
 }

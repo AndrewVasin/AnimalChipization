@@ -19,6 +19,7 @@ import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -114,6 +115,21 @@ public class AccountControllerTest {
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.firstName").value("Bob"))
+                .andExpect(jsonPath("$.lastName").value("Dylan"))
+                .andExpect(jsonPath("$.email").value("bob@domain.com"));
+    }
+
+    @Test
+    public void whenGetRequestToAccountsAndValidIdAccount_thenCorrectResponse() throws Exception {
+        Account account = new Account(1, "Bob", "Dylan",
+                "bob@domain.com", "bob123" );
+
+        when(accountService.findAccountById(1)).thenReturn(Optional.of(account));
+        mockMvc.perform(get("/accounts/{id}", account.getId()))
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(1))
                 .andExpect(jsonPath("$.firstName").value("Bob"))
                 .andExpect(jsonPath("$.lastName").value("Dylan"))
                 .andExpect(jsonPath("$.email").value("bob@domain.com"));
