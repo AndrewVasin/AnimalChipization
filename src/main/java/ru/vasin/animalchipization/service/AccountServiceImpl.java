@@ -1,6 +1,9 @@
 package ru.vasin.animalchipization.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Bean;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import ru.vasin.animalchipization.mapper.AccountMapper;
 import ru.vasin.animalchipization.model.Account;
@@ -37,6 +40,15 @@ public class AccountServiceImpl implements AccountService {
 
     public void deleteAccountById(Integer accountId) {
         accountRepository.deleteById(accountId);
+    }
+
+    @Bean
+    public UserDetailsService userDetailsService(AccountRepository accountRepository) {
+        return username -> {
+            Account account = accountRepository.findByUsername(username);
+            if (account != null) return account;
+            throw new UsernameNotFoundException("Account ‘" + username + "’ not found");
+        };
     }
 
 }

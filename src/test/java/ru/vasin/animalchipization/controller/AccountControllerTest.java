@@ -106,7 +106,7 @@ public class AccountControllerTest {
         accountCreateRequest.setPassword("bob123");
 
         Account account = new Account(1, "Bob", "Dylan",
-                "bob@domain.com", "bob123" );
+                "bob@domain.com", "bob123", "Bobby" );
 
         when(accountService.findAccountByEmail(anyString())).thenReturn(Optional.of(account));
 
@@ -123,7 +123,7 @@ public class AccountControllerTest {
     @Test
     public void whenGetRequestToAccountsAndValidIdAccount_thenCorrectResponse() throws Exception {
         Account account = new Account(1, "Bob", "Dylan",
-                "bob@domain.com", "bob123" );
+                "bob@domain.com", "bob123", "Bobby" );
 
         when(accountService.findAccountById(1)).thenReturn(Optional.of(account));
         mockMvc.perform(get("/accounts/{id}", account.getId()))
