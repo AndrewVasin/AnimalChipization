@@ -4,11 +4,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
+import org.springframework.transaction.annotation.Transactional;
 import ru.vasin.animalchipization.model.Account;
 import ru.vasin.animalchipization.repository.AccountRepository;
 import ru.vasin.animalchipization.service.AccountServiceImpl;
@@ -28,8 +28,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
     OpenAPI генератор не поддерживает данную проверку. Надо создать кастомную аннотацию.
  */
 
-@WebMvcTest
-@AutoConfigureMockMvc
+@SpringBootTest
+@AutoConfigureMockMvc(printOnlyOnFailure = false)
+@Transactional
 public class AccountControllerTest {
 
     @MockBean
@@ -65,7 +66,6 @@ public class AccountControllerTest {
         mockMvc.perform(post("/registration")
                     .content(objectMapper.writeValueAsString(accountCreateRequest))
                     .contentType(MediaType.APPLICATION_JSON))
-                .andDo(MockMvcResultHandlers.print())
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id").value(1))
                 .andExpect(jsonPath("$.firstName").value("Bob"))
@@ -90,7 +90,6 @@ public class AccountControllerTest {
         mockMvc.perform(post("/registration")
                         .content(objectMapper.writeValueAsString(accountCreateRequest))
                         .contentType(MediaType.APPLICATION_JSON))
-                .andDo(MockMvcResultHandlers.print())
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.firstName").value("must not be null"))
                 .andExpect(jsonPath("$.password").value("size must be between 1 and 255"))
@@ -113,7 +112,6 @@ public class AccountControllerTest {
         mockMvc.perform(post("/registration")
                         .content(objectMapper.writeValueAsString(accountCreateRequest))
                         .contentType(MediaType.APPLICATION_JSON))
-                .andDo(MockMvcResultHandlers.print())
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.firstName").value("Bob"))
                 .andExpect(jsonPath("$.lastName").value("Dylan"))
@@ -127,7 +125,7 @@ public class AccountControllerTest {
 
         when(accountService.findAccountById(1)).thenReturn(Optional.of(account));
         mockMvc.perform(get("/accounts/{id}", account.getId()))
-                .andDo(MockMvcResultHandlers.print())
+              //  .with(httpBasic("user", "password")))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(1))
                 .andExpect(jsonPath("$.firstName").value("Bob"))

@@ -10,7 +10,11 @@ spring:
   sql:
     init:
       mode: always
-
+#  тестовый юзер
+  security:
+    user:
+      password: password
+#
 springdoc:
   api-docs:
     enabled: true
