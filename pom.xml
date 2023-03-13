@@ -17,7 +17,7 @@
 
     <properties>
         <jackson-databind-nullable.version>0.2.2</jackson-databind-nullable.version>
-        <java.version>11</java.version>
+        <java.version>17</java.version>
         <openapi-generator-maven-plugin.version>5.4.0</openapi-generator-maven-plugin.version>
         <org.mapstruct.version>1.4.2.Final</org.mapstruct.version>
         <lombok-mapstruct.version>0.2.0</lombok-mapstruct.version>
