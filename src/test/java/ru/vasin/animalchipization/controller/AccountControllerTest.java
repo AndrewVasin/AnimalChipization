@@ -10,7 +10,9 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 import ru.vasin.animalchipization.model.Account;
+import ru.vasin.animalchipization.model.Role;
 import ru.vasin.animalchipization.repository.AccountRepository;
+import ru.vasin.animalchipization.security.CustomAuthenticationProvider;
 import ru.vasin.animalchipization.service.AccountServiceImpl;
 import ru.vasin.web.dto.AccountCreateRequest;
 import ru.vasin.web.dto.AccountResponse;
@@ -47,6 +49,9 @@ public class AccountControllerTest {
     @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
     @Autowired
     private MockMvc mockMvc;
+
+    @MockBean
+    private CustomAuthenticationProvider auth;
 
     @Test
     public void whenPostRequestToAccountsAndValidAccount_thenCorrectResponse() throws Exception {
@@ -106,7 +111,7 @@ public class AccountControllerTest {
         accountCreateRequest.setPassword("bob123");
 
         Account account = new Account(1, "Bob", "Dylan",
-                "bob@domain.com", "bob123", "Bobby" );
+                "bob@domain.com", "bob123", "Bobby", Role.ROLE_USER );
 
         when(accountService.findAccountByEmail(anyString())).thenReturn(Optional.of(account));
 
@@ -122,11 +127,11 @@ public class AccountControllerTest {
     @Test
     public void whenGetRequestToAccountsAndValidIdAccount_thenCorrectResponse() throws Exception {
         Account account = new Account(1, "Bob", "Dylan",
-                "bob@domain.com", "bob123", "Bobby" );
+                "bob@domain.com", "bob123", "Bobby", Role.ROLE_USER );
 
         when(accountService.findAccountById(1)).thenReturn(Optional.of(account));
         mockMvc.perform(get("/accounts/{id}", account.getId())
-                .with(httpBasic("default", "password")))
+                .with(httpBasic(account.getUsername(),account.getPassword())))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(1))
                 .andExpect(jsonPath("$.firstName").value("Bob"))

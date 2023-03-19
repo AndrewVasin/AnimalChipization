@@ -48,6 +48,15 @@ public class Account implements UserDetails {
     @NotBlank
     private String username;
 
+    @Enumerated(value = EnumType.STRING)
+    @Column(name = "role")
+    @NotBlank
+    private Role role;
+
+    public Account(Role role) {
+        this.role = Role.ROLE_USER;
+    }
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority("ROLE_USER"));
