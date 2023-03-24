@@ -34,13 +34,17 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         return http
-                .csrf().and().cors().disable()
-                .httpBasic()
+                .authorizeHttpRequests()
+                //
+                .antMatchers("/registration", "/registration/**").permitAll()
+                .and()
+                .httpBasic().and().authorizeHttpRequests()
+                //
+                .anyRequest().authenticated()
                 .and()
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
-                .authorizeHttpRequests().anyRequest().authenticated()
-                .and()
+                .csrf().and().cors().disable()
                 .build();
     }
 }

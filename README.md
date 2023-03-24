@@ -2,6 +2,7 @@ RESTful API сервис на конкурс «Прикладное програ
 
 Используемый стек:
 - Spring Boot
+- Spring Security
 - Hibernate
 - Swagger
 - OpenAPI Codegen
