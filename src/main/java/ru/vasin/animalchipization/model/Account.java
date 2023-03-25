@@ -4,6 +4,7 @@ import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.bcrypt.BCrypt;
 
 import javax.persistence.*;
 import javax.validation.constraints.Email;
@@ -44,17 +45,16 @@ public class Account implements UserDetails {
     @NotBlank
     private String password;
 
-    @Column(name = "user_name")
-    @NotBlank
-    private String username;
-
     @Enumerated(value = EnumType.STRING)
     @Column(name = "role")
-    @NotBlank
     private Role role;
 
-    public Account(Role role) {
-        this.role = Role.ROLE_USER;
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = BCrypt.hashpw(password, BCrypt.gensalt());
     }
 
     @Override
@@ -64,7 +64,7 @@ public class Account implements UserDetails {
 
     @Override
     public String getUsername() {
-        return this.username;
+        return this.email;
     }
 
     @Override

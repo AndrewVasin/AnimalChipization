@@ -3,15 +3,12 @@ package ru.vasin.animalchipization.controller;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
-import org.springframework.web.bind.MissingPathVariableException;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.context.request.WebRequest;
 import ru.vasin.animalchipization.model.Account;
 import ru.vasin.animalchipization.service.AccountServiceImpl;
 import ru.vasin.web.controller.AccountApi;
@@ -32,14 +29,14 @@ public class AccountController implements AccountApi {
     private final Pattern VALID_EMAIL_ADDRESS_REGEX =
             Pattern.compile("^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,6}$", Pattern.CASE_INSENSITIVE);
 
-    private final AccountServiceImpl accountServiceImpl;
+    private final AccountServiceImpl accountService;
 
     @Transactional
     @Override
     public ResponseEntity<AccountResponse> createNewAccount(@RequestBody AccountCreateRequest accountCreateRequest) {
 
         // Проверка имейла на существование. Если аккаунт с таким имейлом уже существует - отдаем 409
-        if (accountServiceImpl.findAccountByEmail((accountCreateRequest.getEmail())).isPresent()) {
+        if (accountService.findAccountByEmail((accountCreateRequest.getEmail())).isPresent()) {
             log.error("Account with email " + accountCreateRequest.getEmail() + " already exist");
             return ResponseEntity.status(HttpStatus.CONFLICT)
                     .body(new AccountResponse(null,
@@ -49,7 +46,7 @@ public class AccountController implements AccountApi {
         }
 
         // На этом этапе данные уже валидные, создаем новый аккаунт и отдаем 201
-        AccountResponse accountResponse = accountServiceImpl.createAccount(accountCreateRequest);
+        AccountResponse accountResponse = accountService.createAccount(accountCreateRequest);
         log.info("New account " + accountResponse.getFirstName() + " " + accountResponse.getLastName() + " created");
         return ResponseEntity.created(URI.create("/accounts/" + accountResponse.getId())).body(accountResponse);
     }
@@ -62,7 +59,7 @@ public class AccountController implements AccountApi {
             return ResponseEntity.badRequest().build();
         }
         try {
-            accountServiceImpl.deleteAccountById(accountId);
+            accountService.deleteAccountById(accountId);
         } catch (EmptyResultDataAccessException e) {
             log.error("Account with Id: " + accountId + " not found");
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
@@ -73,7 +70,7 @@ public class AccountController implements AccountApi {
 
     @Override
     public ResponseEntity<AccountResponse> findAccount(@PathVariable Integer accountId) {
-        Optional<Account> account = accountServiceImpl.findAccountById(accountId);
+        Optional<Account> account = accountService.findAccountById(accountId);
         if (account.isEmpty()) {
             log.error("Account with Id: " + accountId + " not found");
             return ResponseEntity.notFound().build();
@@ -102,10 +99,10 @@ public class AccountController implements AccountApi {
         return errors;
     }
 
-    @ExceptionHandler(MissingPathVariableException.class)
-    public ResponseEntity<Void> handleMissingPathVariable(MissingPathVariableException ex,
-                                                          HttpHeaders headers, HttpStatus status, WebRequest request) {
-        String error = "Path Variable : " + ex.getVariableName() + " is missing";
-        return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-    }
+//    @ExceptionHandler(MissingPathVariableException.class)
+//    public ResponseEntity<Void> handleMissingPathVariable(MissingPathVariableException ex,
+//                                                          HttpHeaders headers, HttpStatus status, WebRequest request) {
+//        String error = "Path Variable : " + ex.getVariableName() + " is missing";
+//        return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+//    }
 }

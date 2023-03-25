@@ -1,11 +1,14 @@
 package ru.vasin.animalchipization.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import ru.vasin.animalchipization.mapper.AccountMapper;
 import ru.vasin.animalchipization.model.Account;
+import ru.vasin.animalchipization.model.Role;
 import ru.vasin.animalchipization.repository.AccountRepository;
 import ru.vasin.web.dto.AccountCreateRequest;
 import ru.vasin.web.dto.AccountResponse;
@@ -19,12 +22,12 @@ public class AccountServiceImpl implements AccountService, UserDetailsService {
     private final AccountRepository accountRepository;
 
     @Override
-    public Account loadUserByUsername(String username) throws UsernameNotFoundException {
-        Account account = accountRepository.findByUsername(username);
-        if (account == null) {
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        Optional<Account> account = accountRepository.findByEmail(username);
+        if (account.isEmpty()) {
             throw  new UsernameNotFoundException("User ‘" + username + "’ not found");
         }
-        return account;
+        return new User(account.get().getUsername(), account.get().getPassword(), account.get().getAuthorities());
     }
 
     public Optional<Account> findAccountByEmail(String email) {
@@ -37,7 +40,7 @@ public class AccountServiceImpl implements AccountService, UserDetailsService {
 
     @Override
     public Optional<Account> findAccountByUsername(String username) {
-        Account account = accountRepository.findByUsername(username);
+        Account account = accountRepository.findByEmail(username).orElse(null);
         return Optional.ofNullable(account);
     }
 
@@ -47,6 +50,7 @@ public class AccountServiceImpl implements AccountService, UserDetailsService {
         account.setLastName(accountCreateRequest.getLastName());
         account.setEmail(accountCreateRequest.getEmail());
         account.setPassword(accountCreateRequest.getPassword());
+        account.setRole(Role.ROLE_USER);
 
         account = accountRepository.save(account);
         return AccountMapper.INSTANCE.toDto(account);
