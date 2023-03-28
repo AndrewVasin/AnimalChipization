@@ -1,6 +1,7 @@
 package ru.vasin.animalchipization.security;
 
 import org.springframework.context.annotation.Bean;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -38,13 +39,10 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         return http
-               .authorizeHttpRequests()
-                //
-                .antMatchers("/registration")
-                .permitAll()
+                .authorizeRequests()
+                .antMatchers(HttpMethod.POST,"/registration").anonymous()
                 .and()
-                .httpBasic().and().authorizeHttpRequests()
-                //
+                .httpBasic().and().authorizeRequests()
                 .anyRequest().authenticated()
                 .and()
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)

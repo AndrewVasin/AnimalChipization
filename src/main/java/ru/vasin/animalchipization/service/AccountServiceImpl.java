@@ -38,11 +38,10 @@ public class AccountServiceImpl implements AccountService, UserDetailsService {
         return accountRepository.findById(id);
     }
 
-    @Override
-    public Optional<Account> findAccountByUsername(String username) {
-        Account account = accountRepository.findByEmail(username).orElse(null);
-        return Optional.ofNullable(account);
-    }
+//    @Override
+//    public Optional<Account> findAccountByUsername(String username) {
+//        return accountRepository.findByEmail(username);
+//    }
 
     public AccountResponse createAccount(AccountCreateRequest accountCreateRequest) {
         Account account = new Account();

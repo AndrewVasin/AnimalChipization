@@ -2,23 +2,24 @@ package ru.vasin.animalchipization.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.RequestPostProcessor;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.context.WebApplicationContext;
 import ru.vasin.animalchipization.model.Account;
 import ru.vasin.animalchipization.model.Role;
-import ru.vasin.animalchipization.security.SecurityConfig;
 import ru.vasin.animalchipization.service.AccountServiceImpl;
 import ru.vasin.web.dto.AccountCreateRequest;
 import ru.vasin.web.dto.AccountResponse;
 
 import java.util.Optional;
 
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
@@ -42,9 +43,6 @@ public class AccountControllerTest {
 //    @MockBean
 //    private AccountRepository accountRepository;
 
-    @InjectMocks
-    private SecurityConfig securityConfig;
-
     @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
     @Autowired
     private ObjectMapper objectMapper;
@@ -52,6 +50,9 @@ public class AccountControllerTest {
     @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
     @Autowired
     private MockMvc mockMvc;
+
+    @Autowired
+    WebApplicationContext webApplicationContext;
 
     @Test
     public void whenPostRequestToAccountsAndValidAccount_thenCorrectResponse() throws Exception {
@@ -126,17 +127,22 @@ public class AccountControllerTest {
 
     @Test
     public void whenGetRequestToAccountsAndValidIdAccount_thenCorrectResponse() throws Exception {
-        Account account = new Account(1, "Bob", "Dylan",
-                "bob@domain.com", "bob123", Role.ROLE_USER );
+        Optional<Account> account = Optional.of(new Account(1, "Bob", "Dylan",
+                "bob@domain.com", "bob123", Role.ROLE_USER));
 
-        when(accountService.findAccountById(1)).thenReturn(Optional.of(account));
+        when(accountService.findAccountById(anyInt())).thenReturn(account);
         mockMvc.perform(get("/accounts/1")
-                .with(httpBasic(account.getUsername(),account.getPassword())))
+                .with(accountHttpBasic(account)))
+           //     .with(httpBasic("bob@domain.com", "bob123")))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(1))
                 .andExpect(jsonPath("$.firstName").value("Bob"))
                 .andExpect(jsonPath("$.lastName").value("Dylan"))
                 .andExpect(jsonPath("$.email").value("bob@domain.com"));
+    }
+
+    public RequestPostProcessor accountHttpBasic(Optional<Account> account) {
+        return httpBasic(account.get().getEmail(), account.get().getPassword());
     }
 
 //    private Account createTestAccount(AccountCreateRequest account) {
