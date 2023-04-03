@@ -7,3 +7,6 @@ RESTful API сервис на конкурс «Прикладное програ
 - Swagger
 - OpenAPI Codegen
 - PostgreSQL
+
+![img.png](img.png)
+![](D:\MyProjects\AnimalChipization\Swagger UI.pdf)

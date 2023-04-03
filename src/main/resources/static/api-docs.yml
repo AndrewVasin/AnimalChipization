@@ -32,6 +32,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/AccountResponse'
+        403:
+          description: Запрос от авторизованного аккаунта
         409:
           description: Аккаунт с таким email уже существует
           content:
@@ -88,10 +90,6 @@ paths:
           description: Неверные авторизационные данные
         404:
           description: Аккаунт не найден
-      security:
-        - account_auth:
-            - write:accounts
-            - read:accounts
 components:
   schemas:
     AccountResponse:

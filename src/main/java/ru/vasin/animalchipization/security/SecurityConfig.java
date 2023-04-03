@@ -1,7 +1,6 @@
 package ru.vasin.animalchipization.security;
 
 import org.springframework.context.annotation.Bean;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -19,6 +18,25 @@ public class SecurityConfig {
     public SecurityConfig(AccountServiceImpl accountService) {
         this.accountService = accountService;
     }
+
+    private static final String[] AUTH_WHITELIST = {
+
+            // for Swagger UI v2
+            "/v2/api-docs",
+            "/swagger-ui.html",
+            "/swagger-resources",
+            "/swagger-resources/**",
+            "/configuration/ui",
+            "/configuration/security",
+            "/webjars/**",
+            "/configuration",
+
+            // for Swagger UI v3 (OpenAPI)
+            "/v3/api-docs/**",
+            "/api-docs/**",
+            "/swagger-ui/**",
+            "/swagger-ui/index.html"
+    };
 
 //    private final CustomAuthenticationProvider authProvider;
 
@@ -39,15 +57,23 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         return http
-                .authorizeRequests()
-                .antMatchers(HttpMethod.POST,"/registration").anonymous()
+                .csrf()
+//                .and().cors()
+                .disable()
+//                .authorizeHttpRequests()
+//                    .antMatchers(AUTH_WHITELIST).permitAll()
+//                .and()
+                    .antMatcher("/registration")
+                .anonymous()
                 .and()
-                .httpBasic().and().authorizeRequests()
-                .anyRequest().authenticated()
+                .authorizeHttpRequests()
+                    .anyRequest()
+                    .authenticated()
+                .and()
+                .httpBasic()
                 .and()
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
-                .csrf().disable()
                 .build();
     }
 

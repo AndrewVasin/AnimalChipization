@@ -2,15 +2,15 @@ package ru.vasin.animalchipization.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.RequestPostProcessor;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.context.WebApplicationContext;
 import ru.vasin.animalchipization.model.Account;
 import ru.vasin.animalchipization.model.Role;
 import ru.vasin.animalchipization.service.AccountServiceImpl;
@@ -32,9 +32,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
     OpenAPI генератор не поддерживает данную проверку. Надо создать кастомную аннотацию.
  */
 
-@SpringBootTest
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureMockMvc(printOnlyOnFailure = false)
-@Transactional
+//@Transactional
+@ExtendWith(SpringExtension.class)
 public class AccountControllerTest {
 
     @MockBean
@@ -51,8 +52,16 @@ public class AccountControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
-    @Autowired
-    WebApplicationContext webApplicationContext;
+//    @Autowired
+//    WebApplicationContext webApplicationContext;
+//
+//    @Before
+//    public void setup() {
+//        mockMvc = MockMvcBuilders
+//                .webAppContextSetup(webApplicationContext)
+//                .apply(springSecurity())
+//                .build();
+//    }
 
     @Test
     public void whenPostRequestToAccountsAndValidAccount_thenCorrectResponse() throws Exception {
@@ -131,9 +140,10 @@ public class AccountControllerTest {
                 "bob@domain.com", "bob123", Role.ROLE_USER));
 
         when(accountService.findAccountById(anyInt())).thenReturn(account);
+
         mockMvc.perform(get("/accounts/1")
-                .with(accountHttpBasic(account)))
-           //     .with(httpBasic("bob@domain.com", "bob123")))
+           //     .with(accountHttpBasic(account)))
+                .with(httpBasic("bob@domain.com", "bob123")))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(1))
                 .andExpect(jsonPath("$.firstName").value("Bob"))
