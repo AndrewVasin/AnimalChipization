@@ -8,5 +8,4 @@ RESTful API сервис на конкурс «Прикладное програ
 - OpenAPI Codegen
 - PostgreSQL
 
-![img.png](img.png)
-![](D:\MyProjects\AnimalChipization\Swagger UI.pdf)
+![img_1.png](img_1.png)
