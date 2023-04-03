@@ -10,5 +10,5 @@ public interface AccountService {
     Optional<Account> findAccountByEmail(String email);
     AccountResponse createAccount(AccountCreateRequest accountCreateRequest);
     Optional<Account> findAccountById(Integer id);
-    Optional<Account> findAccountByUsername(String username);
+//    Optional<Account> findAccountByUsername(String username);
 }

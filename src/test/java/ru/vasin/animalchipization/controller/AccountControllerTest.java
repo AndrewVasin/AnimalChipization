@@ -2,23 +2,24 @@ package ru.vasin.animalchipization.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.test.web.servlet.request.RequestPostProcessor;
 import ru.vasin.animalchipization.model.Account;
 import ru.vasin.animalchipization.model.Role;
-import ru.vasin.animalchipization.repository.AccountRepository;
-import ru.vasin.animalchipization.security.CustomAuthenticationProvider;
 import ru.vasin.animalchipization.service.AccountServiceImpl;
 import ru.vasin.web.dto.AccountCreateRequest;
 import ru.vasin.web.dto.AccountResponse;
 
 import java.util.Optional;
 
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
@@ -31,16 +32,17 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
     OpenAPI генератор не поддерживает данную проверку. Надо создать кастомную аннотацию.
  */
 
-@SpringBootTest
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureMockMvc(printOnlyOnFailure = false)
-@Transactional
+//@Transactional
+@ExtendWith(SpringExtension.class)
 public class AccountControllerTest {
 
     @MockBean
     private AccountServiceImpl accountService;
 
-    @MockBean
-    private AccountRepository accountRepository;
+//    @MockBean
+//    private AccountRepository accountRepository;
 
     @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
     @Autowired
@@ -50,8 +52,16 @@ public class AccountControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
-    @MockBean
-    private CustomAuthenticationProvider auth;
+//    @Autowired
+//    WebApplicationContext webApplicationContext;
+//
+//    @Before
+//    public void setup() {
+//        mockMvc = MockMvcBuilders
+//                .webAppContextSetup(webApplicationContext)
+//                .apply(springSecurity())
+//                .build();
+//    }
 
     @Test
     public void whenPostRequestToAccountsAndValidAccount_thenCorrectResponse() throws Exception {
@@ -111,7 +121,7 @@ public class AccountControllerTest {
         accountCreateRequest.setPassword("bob123");
 
         Account account = new Account(1, "Bob", "Dylan",
-                "bob@domain.com", "bob123", "Bobby", Role.ROLE_USER );
+                "bob@domain.com", "bob123", Role.ROLE_USER );
 
         when(accountService.findAccountByEmail(anyString())).thenReturn(Optional.of(account));
 
@@ -126,12 +136,14 @@ public class AccountControllerTest {
 
     @Test
     public void whenGetRequestToAccountsAndValidIdAccount_thenCorrectResponse() throws Exception {
-        Account account = new Account(1, "Bob", "Dylan",
-                "bob@domain.com", "bob123", "Bobby", Role.ROLE_USER );
+        Optional<Account> account = Optional.of(new Account(1, "Bob", "Dylan",
+                "bob@domain.com", "bob123", Role.ROLE_USER));
 
-        when(accountService.findAccountById(1)).thenReturn(Optional.of(account));
-        mockMvc.perform(get("/accounts/{id}", account.getId())
-                .with(httpBasic(account.getUsername(),account.getPassword())))
+        when(accountService.findAccountById(anyInt())).thenReturn(account);
+
+        mockMvc.perform(get("/accounts/1")
+           //     .with(accountHttpBasic(account)))
+                .with(httpBasic("bob@domain.com", "bob123")))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(1))
                 .andExpect(jsonPath("$.firstName").value("Bob"))
@@ -139,12 +151,16 @@ public class AccountControllerTest {
                 .andExpect(jsonPath("$.email").value("bob@domain.com"));
     }
 
-    private Account createTestAccount(AccountCreateRequest account) {
-        Account temp = new Account();
-        temp.setFirstName(account.getFirstName());
-        temp.setLastName(account.getLastName());
-        temp.setEmail(account.getEmail());
-        temp.setPassword(account.getPassword());
-        return accountRepository.save(temp);
+    public RequestPostProcessor accountHttpBasic(Optional<Account> account) {
+        return httpBasic(account.get().getEmail(), account.get().getPassword());
     }
+
+//    private Account createTestAccount(AccountCreateRequest account) {
+//        Account temp = new Account();
+//        temp.setFirstName(account.getFirstName());
+//        temp.setLastName(account.getLastName());
+//        temp.setEmail(account.getEmail());
+//        temp.setPassword(account.getPassword());
+//        return accountRepository.save(temp);
+//    }
 }
